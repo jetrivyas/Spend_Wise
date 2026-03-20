@@ -12,9 +12,9 @@ builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 
 builder.Services.AddControllersWithViews();
 
-// Persist DataProtection keys to /tmp/keys so antiforgery tokens survive container restarts
+// Persist DataProtection keys to PostgreSQL — survives container restarts and redeploys
 builder.Services.AddDataProtection()
-    .PersistKeysToFileSystem(new DirectoryInfo("/tmp/keys"))
+    .PersistKeysToDbContext<ExpenseDbContext>()
     .SetApplicationName("SpendWise");
 
 // PostgreSQL via connection string from env var or appsettings

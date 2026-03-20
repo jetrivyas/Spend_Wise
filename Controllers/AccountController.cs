@@ -17,7 +17,12 @@ namespace ExpenseTracker.Controllers
 
         // GET: /Account/Register
         [HttpGet]
-        public IActionResult Register() => View();
+        public IActionResult Register()
+        {
+            if (User.Identity?.IsAuthenticated == true)
+                return RedirectToAction("Index", "Home");
+            return View();
+        }
 
         // POST: /Account/Register
         [HttpPost]
@@ -51,6 +56,8 @@ namespace ExpenseTracker.Controllers
         [HttpGet]
         public IActionResult Login(string? returnUrl = null)
         {
+            if (User.Identity?.IsAuthenticated == true)
+                return RedirectToAction("Index", "Home");
             ViewData["ReturnUrl"] = returnUrl;
             return View();
         }

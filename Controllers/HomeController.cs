@@ -7,7 +7,6 @@ using ExpenseTracker.Models;
 
 namespace ExpenseTracker.Controllers
 {
-    [Authorize]
     public class HomeController : Controller
     {
         private readonly ExpenseDbContext _context;
@@ -19,6 +18,7 @@ namespace ExpenseTracker.Controllers
             _userManager = userManager;
         }
 
+        [Authorize]
         public async Task<IActionResult> Index()
         {
             var userId = _userManager.GetUserId(User)!;

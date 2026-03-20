@@ -1,15 +1,19 @@
+using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using ExpenseTracker.Models;
 
 namespace ExpenseTracker.Data
 {
-    public class ExpenseDbContext : IdentityDbContext<ApplicationUser>
+    public class ExpenseDbContext : IdentityDbContext<ApplicationUser>, IDataProtectionKeyContext
     {
         public ExpenseDbContext(DbContextOptions<ExpenseDbContext> options) : base(options) { }
 
         public DbSet<Expense> Expenses { get; set; }
         public DbSet<Budget> Budgets { get; set; }
+
+        // DataProtection keys stored in Postgres — survives redeploys
+        public DbSet<DataProtectionKey> DataProtectionKeys { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
