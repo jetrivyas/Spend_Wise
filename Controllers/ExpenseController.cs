@@ -85,6 +85,8 @@ namespace ExpenseTracker.Controllers
             if (ModelState.IsValid)
             {
                 expense.UserId    = _userManager.GetUserId(User)!;
+                // Normalize Date to UTC — form posts DateTime as Unspecified which Postgres rejects
+                expense.Date      = DateTime.SpecifyKind(expense.Date.Date, DateTimeKind.Utc);
                 expense.CreatedAt = DateTime.UtcNow;
                 _context.Add(expense);
                 await _context.SaveChangesAsync();
@@ -122,6 +124,8 @@ namespace ExpenseTracker.Controllers
                 if (!exists) return NotFound();
 
                 expense.UserId = userId;
+                // Normalize Date to UTC
+                expense.Date   = DateTime.SpecifyKind(expense.Date.Date, DateTimeKind.Utc);
                 try
                 {
                     _context.Update(expense);
@@ -162,8 +166,8 @@ namespace ExpenseTracker.Controllers
         public async Task<IActionResult> GetCategoryData()
         {
             var userId = _userManager.GetUserId(User)!;
-            var now    = DateTime.Today;
-            var start  = new DateTime(now.Year, now.Month, 1);
+            var now    = DateTime.UtcNow.Date;
+            var start  = DateTime.SpecifyKind(new DateTime(now.Year, now.Month, 1), DateTimeKind.Utc);
 
             var data = await _context.Expenses
                 .Where(e => e.UserId == userId && e.Date >= start)

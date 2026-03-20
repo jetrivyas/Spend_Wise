@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.DataProtection;
 using ExpenseTracker.Data;
 using ExpenseTracker.Models;
 
@@ -10,6 +11,11 @@ var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
 builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 
 builder.Services.AddControllersWithViews();
+
+// Persist DataProtection keys to /tmp/keys so antiforgery tokens survive container restarts
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo("/tmp/keys"))
+    .SetApplicationName("SpendWise");
 
 // PostgreSQL via connection string from env var or appsettings
 var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL")
@@ -32,9 +38,9 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
-    options.LoginPath = "/Account/Login";
+    options.LoginPath = "/";
     options.LogoutPath = "/Account/Logout";
-    options.AccessDeniedPath = "/Account/Login";
+    options.AccessDeniedPath = "/";
 });
 
 builder.Services.AddScoped<ExpenseTracker.Services.ExpensePredictionService>();
@@ -62,6 +68,11 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Account}/{action=Login}/{id?}");
+
+app.MapControllerRoute(
+    name: "home",
+    pattern: "home/{action=Index}/{id?}",
+    defaults: new { controller = "Home" });
 
 app.Run();
